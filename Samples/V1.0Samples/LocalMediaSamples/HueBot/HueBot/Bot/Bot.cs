@@ -20,10 +20,10 @@ namespace Sample.HueBot.Bot
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.Graph.Communications.Resources;
     using Microsoft.Skype.Bots.Media;
+    using Sample.Common;
     using Sample.Common.Authentication;
     using Sample.Common.Meetings;
     using Sample.Common.OnlineMeetings;
-    using Sample.HueBot;
     using Sample.HueBot.Controllers;
     using Sample.HueBot.Extensions;
 

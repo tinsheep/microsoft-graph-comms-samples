@@ -20,6 +20,7 @@ namespace Sample.AudioVideoPlaybackBot.FrontEnd.Bot
     using Microsoft.Skype.Bots.Media;
     using Sample.AudioVideoPlaybackBot.FrontEnd;
     using Sample.AudioVideoPlaybackBot.FrontEnd.Http;
+    using Sample.Common;
     using Sample.Common.Authentication;
     using Sample.Common.Logging;
     using Sample.Common.Meetings;
