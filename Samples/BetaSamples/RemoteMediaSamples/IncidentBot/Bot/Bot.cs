@@ -227,6 +227,100 @@ namespace Sample.IncidentBot.Bot
         }
 
         /// <summary>
+        /// Unknown Visitor incident.
+        /// </summary>
+        /// <param name="incidentRequestData">The incident data.</param>
+        /// <returns>The task for await.</returns>
+        public async Task<ICall> UnknownVisitorAsync(IncidentRequestData incidentRequestData)
+        {
+            // A tracking id for logging purposes. Helps identify this call in logs.
+            var scenarioId = string.IsNullOrEmpty(incidentRequestData.ScenarioId) ? Guid.NewGuid() : new Guid(incidentRequestData.ScenarioId);
+
+            string incidentId = Guid.NewGuid().ToString();
+
+            var incidentStatusData = new IncidentStatusData(incidentId, incidentRequestData);
+
+            var incident = this.IncidentStatusManager.AddIncident(incidentId, incidentStatusData);
+
+            // var botMeetingCall = await this.JoinCallAsync(incidentRequestData, incidentId).ConfigureAwait(false);
+            foreach (var objectId in incidentRequestData.ObjectIds)
+            {
+                var makeCallRequestData =
+                    new MakeCallRequestData(
+                        incidentRequestData.TenantId,
+                        objectId,
+                        "Application".Equals(incidentRequestData.ResponderType, StringComparison.OrdinalIgnoreCase));
+                var responderCall = await this.MakeCallAsync(makeCallRequestData, scenarioId).ConfigureAwait(false);
+                this.AddCallToHandlers(responderCall, new IncidentCallContext(IncidentCallType.ResponderNotification, incidentId));
+            }
+
+            // return botMeetingCall;
+            return null;
+        }
+
+        /// <summary>
+        /// Unknown Visitor incident.
+        /// </summary>
+        /// <param name="incidentRequestData">The incident data.</param>
+        /// <returns>The task for await.</returns>
+        public async Task<ICall> CallUnknownVisitorAsync(IncidentRequestData incidentRequestData)
+        {
+            // A tracking id for logging purposes. Helps identify this call in logs.
+            var scenarioId = string.IsNullOrEmpty(incidentRequestData.ScenarioId) ? Guid.NewGuid() : new Guid(incidentRequestData.ScenarioId);
+            string incidentId = Guid.NewGuid().ToString();
+            var incidentStatusData = new IncidentStatusData(incidentId, incidentRequestData);
+            var incident = this.IncidentStatusManager.AddIncident(incidentId, incidentStatusData);
+            var receptionObjectId = incidentRequestData.ObjectIds.First(); // call the receptionist
+            var buildingObjectId = incidentRequestData.ObjectIds.Last(); // call the building
+
+            var receptionTarget =
+                new ParticipantInfo
+                {
+                    Identity = new IdentitySet
+                    {
+                        User = new Identity
+                        {
+                            Id = receptionObjectId,
+                        },
+                    },
+                };
+            var buildingTarget =
+                new ParticipantInfo
+                {
+                    Identity = new IdentitySet
+                    {
+                        User = new Identity
+                        {
+                            Id = buildingObjectId,
+                        },
+                    },
+                };
+
+            var call = new Call
+            {
+                Targets = new[] { receptionTarget },
+                MediaConfig = new ServiceHostedMediaConfig { },
+                RequestedModalities = new List<Modality> { Modality.Video },
+                TenantId = incidentRequestData.TenantId,
+            };
+
+            // call the receptionist
+            var statefulCall = await this.Client.Calls().AddAsync(call, scenarioId: scenarioId).ConfigureAwait(false);
+
+            // add the building
+            var addParticipantRequestData = new AddParticipantRequestData()
+            {
+                ObjectId = buildingObjectId,
+            };
+
+            await this.AddParticipantAsync(statefulCall.Id, addParticipantRequestData).ConfigureAwait(false);
+            this.graphLogger.Info($"Call creation complete: {statefulCall.Id}");
+
+            // return botMeetingCall;
+            return null;
+        }
+
+        /// <summary>
         /// Joins the call asynchronously.
         /// </summary>
         /// <param name="joinCallBody">The join call body.</param>
@@ -265,7 +359,7 @@ namespace Sample.IncidentBot.Bot
                 mediaToPrefetch.Add(m.Value.MediaInfo);
             }
 
-            var joinParams = new JoinMeetingParameters(chatInfo, meetingInfo, new[] { Modality.Audio }, mediaToPrefetch)
+            var joinParams = new JoinMeetingParameters(chatInfo, meetingInfo, new[] { Modality.Video }, mediaToPrefetch)
             {
                 RemoveFromDefaultAudioRoutingGroup = joinCallBody.RemoveFromDefaultRoutingGroup,
                 TenantId = tenantId,
@@ -338,7 +432,7 @@ namespace Sample.IncidentBot.Bot
             {
                 Targets = new[] { target },
                 MediaConfig = new ServiceHostedMediaConfig { PreFetchMedia = mediaToPrefetch },
-                RequestedModalities = new List<Modality> { Modality.Audio },
+                RequestedModalities = new List<Modality> { Modality.Video },
                 TenantId = makeCallBody.TenantId,
             };
 
@@ -376,8 +470,8 @@ namespace Sample.IncidentBot.Bot
             };
 
             await this.Client.Calls()[callLegId].Participants
-                .InviteAsync(target, addParticipantBody.ReplacesCallId)
-                .ConfigureAwait(false);
+               .InviteAsync(target, addParticipantBody.ReplacesCallId)
+               .ConfigureAwait(false);
         }
 
         /// <summary>

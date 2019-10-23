@@ -75,6 +75,80 @@ namespace IcMBot.Controllers
         }
 
         /// <summary>
+        /// Raise a incident.
+        /// </summary>
+        /// <param name="incidentRequestData">The incident data.</param>
+        /// <returns>The action result.</returns>
+        [HttpPost("unknownvisitor")]
+        public async Task<IActionResult> PostUnknowVisitorAsync([FromBody] IncidentRequestData incidentRequestData)
+        {
+            Validator.NotNull(incidentRequestData, nameof(incidentRequestData));
+
+            try
+            {
+                var call = await this.bot.UnknownVisitorAsync(incidentRequestData).ConfigureAwait(false);
+
+                var callUriTemplate = new UriBuilder(this.bot.BotInstanceUri);
+                callUriTemplate.Path = HttpRouteConstants.CallRoutePrefix.Replace("{callLegId}", call.Id);
+                callUriTemplate.Query = this.bot.BotInstanceUri.Query.Trim('?');
+
+                var callUri = callUriTemplate.Uri.AbsoluteUri;
+                var values = new Dictionary<string, string>
+                {
+                    { "legId", call.Id },
+                    { "scenarioId", call.ScenarioId.ToString() },
+                    { "call", callUri },
+                    { "logs", callUri.Replace("/calls/", "/logs/") },
+                };
+
+                var serializer = new CommsSerializer(pretty: true);
+                var json = serializer.SerializeObject(values);
+                return this.Ok(json);
+            }
+            catch (Exception e)
+            {
+                return this.Exception(e);
+            }
+        }
+
+        /// <summary>
+        /// Raise a incident.
+        /// </summary>
+        /// <param name="incidentRequestData">The incident data.</param>
+        /// <returns>The action result.</returns>
+        [HttpPost("callunknownvisitor")]
+        public async Task<IActionResult> PostCallUnknownVisitorAsync([FromBody] IncidentRequestData incidentRequestData)
+        {
+            Validator.NotNull(incidentRequestData, nameof(incidentRequestData));
+
+            try
+            {
+                var call = await this.bot.CallUnknownVisitorAsync(incidentRequestData).ConfigureAwait(false);
+
+                var callUriTemplate = new UriBuilder(this.bot.BotInstanceUri);
+                callUriTemplate.Path = HttpRouteConstants.CallRoutePrefix.Replace("{callLegId}", call.Id);
+                callUriTemplate.Query = this.bot.BotInstanceUri.Query.Trim('?');
+
+                var callUri = callUriTemplate.Uri.AbsoluteUri;
+                var values = new Dictionary<string, string>
+                {
+                    { "legId", call.Id },
+                    { "scenarioId", call.ScenarioId.ToString() },
+                    { "call", callUri },
+                    { "logs", callUri.Replace("/calls/", "/logs/") },
+                };
+
+                var serializer = new CommsSerializer(pretty: true);
+                var json = serializer.SerializeObject(values);
+                return this.Ok(json);
+            }
+            catch (Exception e)
+            {
+                return this.Exception(e);
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of incidents.
         /// </summary>
         /// <param name="maxCount">The maximum count of insidents in return values.</param>
