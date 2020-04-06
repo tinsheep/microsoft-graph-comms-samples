@@ -313,7 +313,7 @@ namespace Sample.IncidentBot.Bot
                 ObjectId = buildingObjectId,
             };
 
-            await this.AddParticipantAsync(statefulCall.Id, addParticipantRequestData).ConfigureAwait(false);
+            await this.MyAddParticipantAsync(statefulCall.Id, addParticipantRequestData).ConfigureAwait(false);
             this.graphLogger.Info($"Call creation complete: {statefulCall.Id}");
 
             // return botMeetingCall;
@@ -468,6 +468,37 @@ namespace Sample.IncidentBot.Bot
 
             await this.Client.Calls()[callLegId].Participants
                .InviteAsync(target, addParticipantBody.ReplacesCallId)
+               .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Adds participants asynchronously.  This version just calls InviteAsych with the target argument as there is no call to replace.
+        /// </summary>
+        /// <param name="callLegId">which call to add participants.</param>
+        /// <param name="addParticipantBody">The add participant body.</param>
+        /// <returns>The <see cref="Task"/>.</returns>
+        public async Task MyAddParticipantAsync(string callLegId, AddParticipantRequestData addParticipantBody)
+        {
+            if (string.IsNullOrEmpty(callLegId))
+            {
+                throw new ArgumentNullException(nameof(callLegId));
+            }
+
+            if (string.IsNullOrEmpty(addParticipantBody.ObjectId))
+            {
+                throw new ArgumentNullException(nameof(addParticipantBody.ObjectId));
+            }
+
+            var target = new IdentitySet
+            {
+                User = new Identity
+                {
+                    Id = addParticipantBody.ObjectId,
+                },
+            };
+
+            await this.Client.Calls()[callLegId].Participants
+               .InviteAsync(target)
                .ConfigureAwait(false);
         }
 
