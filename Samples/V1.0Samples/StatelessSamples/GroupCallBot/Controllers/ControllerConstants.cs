@@ -3,7 +3,7 @@
 // Licensed under the MIT license.
 // </copyright>
 
-namespace Sample.SimpleIvrBot.Controller
+namespace Sample.GroupCallBot.Controller
 {
     /// <summary>
     /// Http route constants for routing requests.
