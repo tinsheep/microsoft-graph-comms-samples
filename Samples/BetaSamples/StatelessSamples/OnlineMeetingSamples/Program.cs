@@ -19,16 +19,16 @@ namespace Sample.OnlineMeeting
     public class Program
     {
         // Common settings.
-        private static string appSecret = "__placeholder__";
-        private static string appId = "__placeholder__";
-        private static string tenantId = "__placeholder__";
+        private static string appSecret = "dV[Om2:4n=@Lfc79mm=gb@FJW52-7ndo";
+        private static string appId = "7f4b4c58-aa15-4a78-b6e3-578304744f48";
+        private static string tenantId = "40598f49-876f-403b-bf7f-a093e44e25bb";
 
         // Needed for app token meetings.
-        private static string vtcId = "__placeholder__";
+        // private static string vtcId = "__placeholder__";
 
         // Needed for user token meetings.
-        private static string userName = "__placeholder__";
-        private static string password = "__placeholder__";
+        private static string userName = "meganb@M365x600226.onmicrosoft.com";
+        private static string password = "W32Z3mf11J";
 
         private static Uri graphUri = new Uri("https://graph.microsoft.com/beta/");
 
@@ -109,7 +109,7 @@ namespace Sample.OnlineMeeting
             {
                 try
                 {
-                    var meetingDetails = await GetOnlineMeetingByVtcIdAsync(tenantId, vtcId).ConfigureAwait(false);
+                    // var meetingDetails = await GetOnlineMeetingByVtcIdAsync(tenantId, vtcId).ConfigureAwait(false);
 
                     /*
                      * THIS WAY OF CREATING MEETING IS OBSOLETE. CHECK CreateUserOnlineMeetingAsync FOR CREATING MEETINGS.
